@@ -72,9 +72,10 @@
   <form id="create-pack-form">
     <input type="text" placeholder="Nome pacchetto" name="packName" required />
     <input type="number" placeholder="Numero carte" name="cardCount" required />
-<input type="url" placeholder="URL immagine" name="imageUrl" id="imageUrl" />
-    <div id="imagePreview" style="margin-top: 10px;">
-      <!-- Anteprima immagine qui -->
+    <input type="url" placeholder="URL immagine pacchetto" name="packImageUrl" id="packImageUrl" />
+    <div id="packImagePreview" style="margin-top: 10px;">
+      <!-- Anteprima immagine pacchetto -->
+    </div>
     <button type="submit">Crea Pacchetto</button>
   </form>
   <div id="pack-result" style="margin-top:10px;"></div>
@@ -87,7 +88,7 @@
     <textarea name="description" placeholder="Descrizione"></textarea>
     <input type="url" placeholder="URL immagine" name="imageUrl" id="imageUrl" />
     <div id="imagePreview" style="margin-top: 10px;">
-      <!-- Anteprima immagine qui -->
+      <!-- Anteprima immagine carta -->
     </div>
     <select name="packSelect" id="packSelect" required>
       <option value="">Seleziona Pacchetto</option>
@@ -97,7 +98,6 @@
   </form>
   <div id="card-list" style="margin-top:20px;"></div>
 </section>
-
 
 <div id="card-list"></div>
 
@@ -406,6 +406,27 @@ cards.forEach(card => {
   cardList.appendChild(div);
 });
 
+// Anteprima immagine pacchetto
+  document.getElementById('packImageUrl').addEventListener('input', e => {
+    const url = e.target.value.trim();
+    const preview = document.getElementById('packImagePreview');
+    if (url) {
+      preview.innerHTML = `<img src="${url}" alt="Anteprima immagine pacchetto" style="max-width: 200px; max-height: 200px; border-radius: 8px;" />`;
+    } else {
+      preview.innerHTML = '';
+    }
+  });
+
+  // Anteprima immagine carta
+  document.getElementById('imageUrl').addEventListener('input', e => {
+    const url = e.target.value.trim();
+    const preview = document.getElementById('imagePreview');
+    if (url) {
+      preview.innerHTML = `<img src="${url}" alt="Anteprima immagine carta" style="max-width: 200px; max-height: 200px; border-radius: 8px;" />`;
+    } else {
+      preview.innerHTML = '';
+    }
+  });
 </script>
 </body>
 </html>
