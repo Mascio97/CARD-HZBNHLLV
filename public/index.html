@@ -411,20 +411,24 @@ async function loadUserPacks(userId) {
       div.style.marginBottom = "10px";
       div.style.padding = "10px";
       div.style.borderRadius = "6px";
+      div.style.maxWidth = "300px";
 
       div.innerHTML = `
-        ${entry.pack.image_url ? `<img src="${entry.pack.image_url}" style="max-width:80px; border-radius:4px;"><br>` : ''}
+        ${entry.pack.image_url ? `<img src="${entry.pack.image_url}" alt="Immagine pacchetto" style="max-width:100%; max-height:150px; border-radius:5px; margin-bottom:10px;">` : ''}
         <strong>${entry.pack.name}</strong><br>
+        Carte: ${entry.pack.card_count}<br>
         Quantità: ${entry.quantity}<br>
-        <button onclick="openPack('${entry.pack_id}', '${userId}')">Apri</button>
+        <button onclick="openPack(${entry.pack_id}, '${userId}')">Apri pacchetto</button>
       `;
 
       container.appendChild(div);
     });
   } catch (error) {
     console.error(error);
+    document.getElementById('user-packs').innerHTML = "<p>Errore nel caricamento dei pacchetti utente.</p>";
   }
 }
+
 await loadUserPacks(currentUserId);
 
 // helpers.js
@@ -477,6 +481,41 @@ export async function openPack(packId, userId) {
   await loadUserPacks(userId);
   await loadUserCollection(userId);
   alert(`Hai ottenuto: ${card.name}`);
+}
+
+async function loadUserCollection(userId) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&select=card:card_id(name,description,image_url,type)`, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
+    }
+  });
+  const cards = await res.json();
+
+  const container = document.getElementById('collection');
+  const display = document.createElement('div');
+  display.innerHTML = '<h3>Le tue carte:</h3>';
+
+  if (cards.length === 0) {
+    display.innerHTML += "<p>Non hai ancora carte nella tua collezione.</p>";
+  } else {
+    cards.forEach(entry => {
+      const div = document.createElement('div');
+      div.style.borderBottom = '1px solid #444';
+      div.style.marginBottom = '10px';
+      div.style.paddingBottom = '5px';
+      div.innerHTML = `
+        <strong>${entry.card.name}</strong> (${entry.card.type || 'N/A'})<br>
+        ${entry.card.description || ''}<br>
+        ${entry.card.image_url ? `<img src="${entry.card.image_url}" style="max-width:150px; border-radius:5px; margin-top:5px;">` : ''}
+      `;
+      display.appendChild(div);
+    });
+  }
+
+  // Pulisce e aggiorna la sezione
+  container.innerHTML = '<h2>La tua Collezione</h2>';
+  container.appendChild(display);
 }
 
 
