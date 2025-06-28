@@ -65,37 +65,36 @@
     <!-- TODO: inserire logica per mostrare la collezione -->
   </section>
 
-  <section id="admin">
+<section id="admin">
   <h2>Area Admin</h2>
   
   <h3>Gestione Pacchetti</h3>
-<form id="create-card-form">
-  <input type="text" placeholder="Nome carta" name="cardName" required />
-  <input type="text" placeholder="Tipo carta" name="cardType" />
-  <textarea name="description" placeholder="Descrizione"></textarea>
-  <input type="url" placeholder="URL immagine" name="imageUrl" id="imageUrl" />
-  <div id="imagePreview" style="margin-top: 10px;">
-    <!-- Anteprima immagine qui -->
-  </div>
-  <select name="packSelect" id="packSelect" required>
-    <option value="">Seleziona Pacchetto</option>
-  </select>
-  <button type="submit">Aggiungi Carta</button>
-</form>
+  <form id="create-pack-form">
+    <input type="text" placeholder="Nome pacchetto" name="packName" required />
+    <input type="number" placeholder="Numero carte" name="cardCount" required />
+    <button type="submit">Crea Pacchetto</button>
+  </form>
+  <div id="pack-result" style="margin-top:10px;"></div>
+  <div id="pack-list" style="margin-top:20px;"></div>
 
+  <h3>Gestione Carte</h3>
+  <form id="create-card-form" style="margin-top:20px;">
+    <input type="text" placeholder="Nome carta" name="cardName" required />
+    <input type="text" placeholder="Tipo carta" name="cardType" />
+    <textarea name="description" placeholder="Descrizione"></textarea>
+    <input type="url" placeholder="URL immagine" name="imageUrl" id="imageUrl" />
+    <div id="imagePreview" style="margin-top: 10px;">
+      <!-- Anteprima immagine qui -->
+    </div>
+    <select name="packSelect" id="packSelect" required>
+      <option value="">Seleziona Pacchetto</option>
+      <!-- Opzioni caricate dinamicamente -->
+    </select>
+    <button type="submit">Aggiungi Carta</button>
+  </form>
+  <div id="card-list" style="margin-top:20px;"></div>
+</section>
 
-<div id="pack-list"></div>
-
-<h3>Gestione Carte</h3>
-<form id="create-card-form">
-  <input type="text" placeholder="Nome carta" name="cardName" required />
-  <input type="text" placeholder="Tipo carta" name="cardType" />
-  <textarea name="description" placeholder="Descrizione"></textarea>
-  <select name="packSelect" id="packSelect" required>
-    <option value="">Seleziona Pacchetto</option>
-  </select>
-  <button type="submit">Aggiungi Carta</button>
-</form>
 
 <div id="card-list"></div>
 
