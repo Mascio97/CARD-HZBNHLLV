@@ -66,18 +66,28 @@
   </section>
 
   <section id="admin">
-    <h2>Area Admin</h2>
-    <p>Gestione riservata agli amministratori del gioco.</p>
-    <!-- TODO: inserire strumenti di gestione admin -->
-  </section>
+  <h2>Area Admin</h2>
+  
+  <h3>Gestione Pacchetti</h3>
+  <form id="create-pack-form">
+    <input type="text" placeholder="Nome pacchetto" name="packName" required />
+    <input type="number" placeholder="Numero carte" name="cardCount" required />
+    <button type="submit">Crea Pacchetto</button>
+  </form>
 
-  <script>
-    function showSection(id) {
-      document.querySelectorAll('section').forEach(sec => {
-        sec.classList.remove('active');
-      });
-      document.getElementById(id).classList.add('active');
-    }
+  <div id="pack-result"></div>
+
+  <h3>Gestione Carte</h3>
+  <form id="create-card-form">
+    <input type="text" placeholder="Nome carta" name="cardName" required />
+    <input type="text" placeholder="Tipo carta" name="cardType" />
+    <textarea name="description" placeholder="Descrizione"></textarea>
+    <button type="submit">Aggiungi Carta</button>
+  </form>
+
+  <div id="card-result"></div>
+</section>
+
   </script>
 
 <script>
