@@ -425,7 +425,8 @@ async function loadUserPacks(userId) {
     });
   } catch (error) {
     console.error(error);
-    document.getElementById('user-packs').innerHTML = "<p>Errore nel caricamento dei pacchetti utente.</p>";
+    const container = document.getElementById('user-packs');
+    container.innerHTML = "<p>Errore nel caricamento dei pacchetti utente.</p>";
   }
 }
 
@@ -473,15 +474,99 @@ export async function loadUserCollection(userId) {
   });
 }
 
-export async function openPack(packId, userId) {
-  const cards = await fetchCards(packId);
-  const card = cards[Math.floor(Math.random() * cards.length)];
+async function openPack(packId, userId) {
+  try {
+    // Ottieni le carte del pacchetto
+    const cards = await fetchCards(packId);
+    if (!cards.length) {
+      alert("Il pacchetto non contiene carte!");
+      return;
+    }
 
-  await addOrUpdateUserCard(userId, card.id);
-  await loadUserPacks(userId);
-  await loadUserCollection(userId);
-  alert(`Hai ottenuto: ${card.name}`);
+    // Pesca casuale una carta
+    const card = cards[Math.floor(Math.random() * cards.length)];
+
+    // Aggiungi o aggiorna la carta nella collezione utente
+    const userCardRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&card_id=eq.${card.id}`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!userCardRes.ok) throw new Error("Errore nel controllo carta utente");
+    const existingUserCards = await userCardRes.json();
+
+    if (existingUserCards.length > 0) {
+      // aggiorna quantità
+      const newQuantity = existingUserCards[0].quantity + 1;
+      const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&card_id=eq.${card.id}`, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity: newQuantity })
+      });
+      if (!updateRes.ok) throw new Error("Errore aggiornamento quantità carta");
+    } else {
+      // inserisci nuova carta
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id: userId, card_id: card.id, quantity: 1 })
+      });
+      if (!insertRes.ok) throw new Error("Errore inserimento carta utente");
+    }
+
+    // Decrementa quantità del pacchetto
+    const userPackRes = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!userPackRes.ok) throw new Error("Errore recupero pacchetto utente");
+    const userPacks = await userPackRes.json();
+    if (userPacks.length === 0) throw new Error("Pacchetto utente non trovato");
+
+    const currentQuantity = userPacks[0].quantity;
+    if (currentQuantity <= 1) {
+      // elimina il record
+      const deleteRes = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
+        method: 'DELETE',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+      });
+      if (!deleteRes.ok) throw new Error("Errore eliminazione pacchetto utente");
+    } else {
+      // aggiorna quantità decrementandola di 1
+      const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity: currentQuantity - 1 })
+      });
+      if (!patchRes.ok) throw new Error("Errore aggiornamento quantità pacchetto");
+    }
+
+    alert(`Hai ottenuto: ${card.name}`);
+    await loadUserPacks(userId); // Ricarica lista pacchetti
+  } catch (error) {
+    console.error(error);
+    alert("Errore apertura pacchetto: " + error.message);
+  }
 }
+
 
 async function loadUserCollection(userId) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&select=card:card_id(name,description,image_url,type)`, {
