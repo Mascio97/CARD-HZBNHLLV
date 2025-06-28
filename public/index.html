@@ -350,87 +350,120 @@ async function fetchUserPacks(userId) {
 
 async function openPack(packId, userId) {
   try {
-    // Ottieni le carte del pacchetto
+    // Prendi le carte del pacchetto
     const cards = await fetchCards(packId);
     if (!cards.length) {
-      alert("Il pacchetto non contiene carte!");
+      alert("Il pacchetto è vuoto!");
       return;
     }
 
-    // Pesca casuale
+    // Pesca una carta casuale
     const card = cards[Math.floor(Math.random() * cards.length)];
 
-    // Salva nella collezione dell'utente
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/user_cards`, {
-      method: 'POST',
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        card_id: card.id
-      })
+    // Aggiungi o aggiorna la carta nell'user_cards
+    // Prima controllo se l'utente ha già la carta
+    let res = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&card_id=eq.${card.id}`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
     });
+    if (!res.ok) throw new Error('Errore fetch user_cards');
+    const existing = await res.json();
 
-    if (!res.ok) throw new Error("Errore nel salvataggio della carta");
+    if (existing.length > 0) {
+      // Aggiorna quantità +1
+      const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&card_id=eq.${card.id}`, {
+        method: 'PATCH',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity: existing[0].quantity + 1 })
+      });
+      if (!updateRes.ok) throw new Error('Errore aggiornamento carta');
+    } else {
+      // Inserisci nuova carta
+      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          card_id: card.id,
+          quantity: 1
+        })
+      });
+      if (!insertRes.ok) throw new Error('Errore inserimento carta');
+    }
 
-    // Decrementa quantità del pacchetto
-    await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
+    // Decrementa quantità pacchetto (leggi prima la quantità attuale)
+    res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!res.ok) throw new Error('Errore fetch user_packs');
+    const userPack = await res.json();
+    if (userPack.length === 0) throw new Error('Pacchetto utente non trovato');
+    const currentQty = userPack[0].quantity;
+    if (currentQty <= 0) {
+      alert("Non hai più pacchetti di questo tipo!");
+      return;
+    }
+    const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
       method: 'PATCH',
       headers: {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ quantity: 1 }) // in realtà questo serve solo se c'è una funzione di decremento nel DB
+      body: JSON.stringify({ quantity: currentQty - 1 })
     });
+    if (!patchRes.ok) throw new Error('Errore aggiornamento quantità pacchetto');
 
     alert(`Hai ottenuto: ${card.name}`);
-    loadUserPacks(userId); // Ricarica lista pacchetti
-  } catch (error) {
-    console.error(error);
-    alert("Errore apertura pacchetto");
+    loadUserPacks(userId);
+  } catch (err) {
+    console.error(err);
+    alert('Errore apertura pacchetto: ' + err.message);
   }
 }
+
 async function loadUserPacks(userId) {
   try {
-    const packs = await fetchUserPacks(userId);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&select=quantity,pack_id,name:pack_id(name),image_url:pack_id(image_url),card_count:pack_id(card_count)`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!res.ok) throw new Error('Errore fetch user packs');
+    const packs = await res.json();
     const container = document.getElementById('user-packs');
     container.innerHTML = "<h3>I tuoi pacchetti:</h3>";
-
     if (packs.length === 0) {
       container.innerHTML += "<p>Non hai pacchetti da aprire.</p>";
       return;
     }
-
-    packs.forEach(entry => {
-      const div = document.createElement('div');
-      div.style.border = "1px solid #444";
-      div.style.marginBottom = "10px";
-      div.style.padding = "10px";
-      div.style.borderRadius = "6px";
-      div.style.maxWidth = "300px";
-
-      div.innerHTML = `
-        ${entry.pack.image_url ? `<img src="${entry.pack.image_url}" alt="Immagine pacchetto" style="max-width:100%; max-height:150px; border-radius:5px; margin-bottom:10px;">` : ''}
-        <strong>${entry.pack.name}</strong><br>
-        Carte: ${entry.pack.card_count}<br>
-        Quantità: ${entry.quantity}<br>
-        <button onclick="openPack(${entry.pack_id}, '${userId}')">Apri pacchetto</button>
-      `;
-
-      container.appendChild(div);
+    packs.forEach(pack => {
+      container.innerHTML += `
+      <div style="border:1px solid #444; margin-bottom:10px; padding:10px; border-radius:6px; max-width:300px;">
+        ${pack.image_url ? `<img src="${pack.image_url}" alt="Immagine pacchetto" style="max-width:100%; max-height:150px; border-radius:5px; margin-bottom:10px;">` : ''}
+        <strong>${pack.name}</strong><br>
+        Carte: ${pack.card_count}<br>
+        Quantità: ${pack.quantity}<br>
+        <button onclick="openPack(${pack.pack_id}, '${userId}')">Apri pacchetto</button>
+      </div>`;
     });
   } catch (error) {
     console.error(error);
-    const container = document.getElementById('user-packs');
-    container.innerHTML = "<p>Errore nel caricamento dei pacchetti utente.</p>";
+    document.getElementById('user-packs').innerHTML = "<p>Errore nel caricamento dei pacchetti utente.</p>";
   }
 }
 
-await loadUserPacks(currentUserId);
+// Caricamento iniziale
+loadUserPacks(currentUserId);
+
 
 // helpers.js
 
