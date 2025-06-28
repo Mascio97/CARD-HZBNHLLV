@@ -427,6 +427,57 @@ async function loadUserPacks(userId) {
 }
 await loadUserPacks(currentUserId);
 
+// helpers.js
+
+export async function addOrUpdateUserCard(userId, cardId) {
+  const { data, error } = await supabase
+    .from('user_cards')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('card_id', cardId)
+    .maybeSingle();
+
+  if (data) {
+    await supabase
+      .from('user_cards')
+      .update({ quantity: data.quantity + 1 })
+      .eq('user_id', userId)
+      .eq('card_id', cardId);
+  } else {
+    await supabase
+      .from('user_cards')
+      .insert({ user_id: userId, card_id: cardId, quantity: 1 });
+  }
+}
+
+export async function loadUserCollection(userId) {
+  const { data: entries } = await supabase
+    .from('user_cards')
+    .select('quantity, card:card_id(name, type, description, image_url)')
+    .eq('user_id', userId);
+
+  const container = document.getElementById('collection');
+  container.innerHTML = '<h2>La tua collezione</h2>';
+
+  entries.forEach(e => {
+    container.innerHTML += `
+      <div style="margin-bottom:10px;">
+        <img src="${e.card.image_url}" alt="${e.card.name}" style="max-width:100px; border-radius:5px;"/>
+        <strong>${e.card.name}</strong> (x${e.quantity})<br>
+        ${e.card.type || ''} - ${e.card.description || ''}
+      </div>`;
+  });
+}
+
+export async function openPack(packId, userId) {
+  const cards = await fetchCards(packId);
+  const card = cards[Math.floor(Math.random() * cards.length)];
+
+  await addOrUpdateUserCard(userId, card.id);
+  await loadUserPacks(userId);
+  await loadUserCollection(userId);
+  alert(`Hai ottenuto: ${card.name}`);
+}
 
 
 </script>
