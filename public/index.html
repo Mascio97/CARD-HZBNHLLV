@@ -69,23 +69,27 @@
   <h2>Area Admin</h2>
   
   <h3>Gestione Pacchetti</h3>
-  <form id="create-pack-form">
-    <input type="text" placeholder="Nome pacchetto" name="packName" required />
-    <input type="number" placeholder="Numero carte" name="cardCount" required />
-    <button type="submit">Crea Pacchetto</button>
-  </form>
+<form id="create-pack-form">
+  <input type="text" placeholder="Nome pacchetto" name="packName" required />
+  <input type="number" placeholder="Numero carte" name="cardCount" required />
+  <button type="submit">Crea Pacchetto</button>
+</form>
 
-  <div id="pack-result"></div>
+<div id="pack-list"></div>
 
-  <h3>Gestione Carte</h3>
-  <form id="create-card-form">
-    <input type="text" placeholder="Nome carta" name="cardName" required />
-    <input type="text" placeholder="Tipo carta" name="cardType" />
-    <textarea name="description" placeholder="Descrizione"></textarea>
-    <button type="submit">Aggiungi Carta</button>
-  </form>
+<h3>Gestione Carte</h3>
+<form id="create-card-form">
+  <input type="text" placeholder="Nome carta" name="cardName" required />
+  <input type="text" placeholder="Tipo carta" name="cardType" />
+  <textarea name="description" placeholder="Descrizione"></textarea>
+  <select name="packSelect" id="packSelect" required>
+    <option value="">Seleziona Pacchetto</option>
+  </select>
+  <button type="submit">Aggiungi Carta</button>
+</form>
 
-  <div id="card-result"></div>
+<div id="card-list"></div>
+
 </section>
 
  
@@ -189,6 +193,138 @@ document.getElementById('create-card-form').addEventListener('submit', async e =
     document.getElementById('card-result').textContent = error.message;
   }
 });
+
+// Funzione per prendere pacchetti da Supabase e aggiornare UI
+async function fetchPacks() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/packs?select=*`, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
+    }
+  });
+  if (!res.ok) throw new Error('Errore fetch pacchetti');
+  const packs = await res.json();
+
+  const packList = document.getElementById('pack-list');
+  const packSelect = document.getElementById('packSelect');
+  packList.innerHTML = '<h4>Pacchetti esistenti:</h4>';
+  packSelect.innerHTML = '<option value="">Seleziona Pacchetto</option>';
+
+  packs.forEach(pack => {
+    const div = document.createElement('div');
+    div.textContent = `${pack.name} - Carte: ${pack.card_count}`;
+    packList.appendChild(div);
+
+    const option = document.createElement('option');
+    option.value = pack.id;
+    option.textContent = pack.name;
+    packSelect.appendChild(option);
+  });
+}
+
+// Funzione per prendere carte di un pacchetto e aggiornare UI
+async function fetchCards(packId) {
+  if (!packId) {
+    document.getElementById('card-list').innerHTML = '';
+    return;
+  }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/cards?pack_id=eq.${packId}`, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
+    }
+  });
+  if (!res.ok) throw new Error('Errore fetch carte');
+  const cards = await res.json();
+
+  const cardList = document.getElementById('card-list');
+  cardList.innerHTML = `<h4>Carte nel pacchetto selezionato:</h4>`;
+  cards.forEach(card => {
+    const div = document.createElement('div');
+    div.innerHTML = `<strong>${card.name}</strong> (${card.type || 'N/A'})<br>${card.description || ''}`;
+    cardList.appendChild(div);
+  });
+}
+
+// Quando cambia il pacchetto selezionato aggiorna lista carte
+document.getElementById('packSelect').addEventListener('change', e => {
+  fetchCards(e.target.value);
+});
+
+// Submit creazione pacchetto
+document.getElementById('create-pack-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = e.target.packName.value;
+  const cardCount = parseInt(e.target.cardCount.value);
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/packs`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation'
+      },
+      body: JSON.stringify({ name: name, card_count: cardCount })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(errText);
+    }
+
+    await fetchPacks();
+    e.target.reset();
+  } catch (error) {
+    alert("Errore creazione pacchetto: " + error.message);
+  }
+});
+
+// Submit creazione carta
+document.getElementById('create-card-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = e.target.cardName.value;
+  const type = e.target.cardType.value;
+  const description = e.target.description.value;
+  const packId = e.target.packSelect.value;
+
+  if (!packId) {
+    alert('Seleziona un pacchetto per la carta');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/cards`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation'
+      },
+      body: JSON.stringify({
+        name: name,
+        type: type,
+        description: description,
+        pack_id: packId
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(errText);
+    }
+
+    await fetchCards(packId);
+    e.target.reset();
+  } catch (error) {
+    alert("Errore creazione carta: " + error.message);
+  }
+});
+
+// All'avvio carica pacchetti
+fetchPacks();
 
 </script>
 </body>
