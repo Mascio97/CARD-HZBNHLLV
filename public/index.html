@@ -57,6 +57,8 @@
   <section id="packs" class="active">
     <h2>Visualizza Pacchetti</h2>
     <p>Qui puoi vedere e aprire i pacchetti di carte.</p>
+<div id="user-packs" style="margin-top: 20px;"></div>
+
     <!-- TODO: inserire logica per mostrare/aprire pacchetti -->
   </section>
 
@@ -335,6 +337,95 @@ preview.innerHTML = url ? `<img src="${url}" alt="Anteprima immagine carta" styl
 // Caricamento iniziale
 loadPacksAndUI();
 
+async function fetchUserPacks(userId) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&select=*,pack:pack_id(name,image_url,card_count)`, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
+    }
+  });
+  if (!res.ok) throw new Error('Errore nel recupero pacchetti utente');
+  return await res.json();
+}
+
+async function openPack(packId, userId) {
+  try {
+    // Ottieni le carte del pacchetto
+    const cards = await fetchCards(packId);
+    if (!cards.length) {
+      alert("Il pacchetto non contiene carte!");
+      return;
+    }
+
+    // Pesca casuale
+    const card = cards[Math.floor(Math.random() * cards.length)];
+
+    // Salva nella collezione dell'utente
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/user_cards`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        card_id: card.id
+      })
+    });
+
+    if (!res.ok) throw new Error("Errore nel salvataggio della carta");
+
+    // Decrementa quantità del pacchetto
+    await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
+      method: 'PATCH',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ quantity: 1 }) // in realtà questo serve solo se c'è una funzione di decremento nel DB
+    });
+
+    alert(`Hai ottenuto: ${card.name}`);
+    loadUserPacks(userId); // Ricarica lista pacchetti
+  } catch (error) {
+    console.error(error);
+    alert("Errore apertura pacchetto");
+  }
+}
+async function loadUserPacks(userId) {
+  try {
+    const packs = await fetchUserPacks(userId);
+    const container = document.getElementById('user-packs');
+    container.innerHTML = "<h3>I tuoi pacchetti:</h3>";
+
+    if (packs.length === 0) {
+      container.innerHTML += "<p>Non hai pacchetti da aprire.</p>";
+      return;
+    }
+
+    packs.forEach(entry => {
+      const div = document.createElement('div');
+      div.style.border = "1px solid #444";
+      div.style.marginBottom = "10px";
+      div.style.padding = "10px";
+      div.style.borderRadius = "6px";
+
+      div.innerHTML = `
+        ${entry.pack.image_url ? `<img src="${entry.pack.image_url}" style="max-width:80px; border-radius:4px;"><br>` : ''}
+        <strong>${entry.pack.name}</strong><br>
+        Quantità: ${entry.quantity}<br>
+        <button onclick="openPack('${entry.pack_id}', '${userId}')">Apri</button>
+      `;
+
+      container.appendChild(div);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+await loadUserPacks(currentUserId);
 
 
 
