@@ -114,5 +114,82 @@
   }
 </script>
 
+<script>
+const SUPABASE_URL = 'https://lwlsnrbrkpzzfxixcoqj.supabase.co';  // metti il tuo URL
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bHNucmJya3B6emZ4aXhjb3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMTgxODIsImV4cCI6MjA2NjY5NDE4Mn0.nrtqIG59DUmy2lgn5C6Yg1e7t-12_ImoFrPy2pF4jE8';       // metti la tua anon key
+
+async function createPack(name, cardCount) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/packs`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'  // per avere il dato appena creato nella risposta
+    },
+    body: JSON.stringify({ name: name, card_count: cardCount })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error('Errore creazione pacchetto: ' + error);
+  }
+
+  return await response.json();  // ritorna il pacchetto creato
+}
+async function createCard(name, type, description, packId = null, imageUrl = null) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/cards`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify({
+      name: name,
+      type: type,
+      description: description,
+      pack_id: packId,
+      image_url: imageUrl
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error('Errore creazione carta: ' + error);
+  }
+
+  return await response.json();
+}
+
+document.getElementById('create-pack-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = e.target.packName.value;
+  const cardCount = parseInt(e.target.cardCount.value);
+  try {
+    const pack = await createPack(name, cardCount);
+    document.getElementById('pack-result').textContent = `Pacchetto creato: ${pack[0].name}`;
+    e.target.reset();
+  } catch (error) {
+    document.getElementById('pack-result').textContent = error.message;
+  }
+});
+
+document.getElementById('create-card-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = e.target.cardName.value;
+  const type = e.target.cardType.value;
+  const description = e.target.description.value;
+  try {
+    const card = await createCard(name, type, description);
+    document.getElementById('card-result').textContent = `Carta creata: ${card[0].name}`;
+    e.target.reset();
+  } catch (error) {
+    document.getElementById('card-result').textContent = error.message;
+  }
+});
+
+</script>
 </body>
 </html>
