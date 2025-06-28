@@ -1,16 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Card Collector</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Card Collector Activity</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #111;
+      color: #eee;
+    }
+    header {
+      background-color: #222;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      border-bottom: 2px solid #333;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      background-color: #1b1b1b;
+      padding: 0.5rem;
+    }
+    nav button {
+      background-color: #333;
+      color: #eee;
+      border: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    nav button:hover {
+      background-color: #555;
+    }
+    section {
+      padding: 1rem;
+      display: none;
+    }
+    section.active {
+      display: block;
+    }
+  </style>
 </head>
 <body>
-  <h1>🎴 Card Collector</h1>
-  <button id="openPackBtn">Open a Pack</button>
-  <div id="packResult"></div>
-  <h2>Your Collection</h2>
-  <div id="collection"></div>
-  <script src="script.js"></script>
+  <header>Card Collector Activity</header>
+  <nav>
+    <button onclick="showSection('packs')">Pacchetti</button>
+    <button onclick="showSection('collection')">Collezione</button>
+    <button onclick="showSection('admin')">Admin</button>
+  </nav>
+
+  <section id="packs" class="active">
+    <h2>Visualizza Pacchetti</h2>
+    <p>Qui puoi vedere e aprire i pacchetti di carte.</p>
+    <!-- TODO: inserire logica per mostrare/aprire pacchetti -->
+  </section>
+
+  <section id="collection">
+    <h2>La tua Collezione</h2>
+    <p>Qui puoi vedere tutte le carte che hai raccolto.</p>
+    <!-- TODO: inserire logica per mostrare la collezione -->
+  </section>
+
+  <section id="admin">
+    <h2>Area Admin</h2>
+    <p>Gestione riservata agli amministratori del gioco.</p>
+    <!-- TODO: inserire strumenti di gestione admin -->
+  </section>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(sec => {
+        sec.classList.remove('active');
+      });
+      document.getElementById(id).classList.add('active');
+    }
+  </script>
 </body>
 </html>
