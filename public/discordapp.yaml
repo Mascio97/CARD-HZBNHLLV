@@ -1,0 +1,5 @@
+name: "Card Collector"
+type: "activity"
+schema_version: 1
+endpoint: "https://your-vercel-url.vercel.app"
+commands: []
