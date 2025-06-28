@@ -439,38 +439,45 @@ cards.forEach(card => {
   });
 
 async function loadPacks() {
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/packs?select=*`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/packs?select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Errore nel caricamento pacchetti');
     }
-  });
-  if (!response.ok) {
-    console.error('Errore nel caricamento pacchetti');
-    return;
+    const packs = await response.json();
+
+    const packListDiv = document.getElementById('pack-list');
+    packListDiv.innerHTML = ''; // pulisco
+
+    packs.forEach(pack => {
+      const packDiv = document.createElement('div');
+      packDiv.style.marginBottom = '15px';
+
+      const imgHtml = pack.image_url
+        ? `<img src="${pack.image_url}" alt="Immagine pacchetto" style="max-width:150px; max-height:150px; border-radius: 6px; display:block; margin-bottom:5px;" />`
+        : '';
+
+      packDiv.innerHTML = `
+        ${imgHtml}
+        <strong>${pack.name}</strong> - Carte: ${pack.card_count}
+      `;
+
+      packListDiv.appendChild(packDiv);
+    });
+  } catch (error) {
+    console.error(error);
+    document.getElementById('pack-list').textContent = 'Errore nel caricamento pacchetti.';
   }
-  const packs = await response.json();
-  
-  const packListDiv = document.getElementById('pack-list');
-  packListDiv.innerHTML = ''; // pulisco prima
-  
-  packs.forEach(pack => {
-    const packDiv = document.createElement('div');
-    packDiv.style.marginBottom = '15px';
-    
-    // se c'è immagine, la inserisco
-    let imgHtml = '';
-    if (pack.image_url) {
-      imgHtml = `<img src="${pack.image_url}" alt="Immagine pacchetto" style="max-width:150px; max-height:150px; border-radius: 6px; display:block; margin-bottom:5px;" />`;
-    }
-    
-    packDiv.innerHTML = `
-      ${imgHtml}
-      <strong>${pack.name}</strong> - Carte: ${pack.card_count}
-    `;
-    
-    packListDiv.appendChild(packDiv);
-  });
+}
+
+// Chiama questa funzione all’avvio o dopo la creazione di un pacchetto
+loadPacks();
+
 }
 
 </script>
