@@ -431,7 +431,7 @@ async function openPack(packId, userId) {
 
 async function loadUserPacks(userId) {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&select=quantity,pack_id,name:pack_id(name),image_url:pack_id(image_url),card_count:pack_id(card_count)`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&select=quantity,pack:pack_id(id,name,image_url,card_count)`, {
       headers: {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`
@@ -447,19 +447,21 @@ async function loadUserPacks(userId) {
     }
     packs.forEach(pack => {
       container.innerHTML += `
-      <div style="border:1px solid #444; margin-bottom:10px; padding:10px; border-radius:6px; max-width:300px;">
-        ${pack.image_url ? `<img src="${pack.image_url}" alt="Immagine pacchetto" style="max-width:100%; max-height:150px; border-radius:5px; margin-bottom:10px;">` : ''}
-        <strong>${pack.name}</strong><br>
-        Carte: ${pack.card_count}<br>
-        Quantità: ${pack.quantity}<br>
-        <button onclick="openPack(${pack.pack_id}, '${userId}')">Apri pacchetto</button>
-      </div>`;
+        <div style="border:1px solid #444; margin-bottom:10px; padding:10px; border-radius:6px; max-width:300px;">
+          ${pack.pack.image_url ? `<img src="${pack.pack.image_url}" alt="Immagine pacchetto" style="max-width:100%; max-height:150px; border-radius:5px; margin-bottom:10px;">` : ''}
+          <strong>${pack.pack.name}</strong><br>
+          Carte: ${pack.pack.card_count}<br>
+          Quantità: ${pack.quantity}<br>
+          <button onclick="openPack(${pack.pack.id}, '${userId}')">Apri Pacchetto</button>
+        </div>
+      `;
     });
-  } catch (error) {
-    console.error(error);
-    document.getElementById('user-packs').innerHTML = "<p>Errore nel caricamento dei pacchetti utente.</p>";
+  } catch (err) {
+    console.error(err);
+    alert('Errore caricamento pacchetti utente: ' + err.message);
   }
 }
+
 
 // Caricamento iniziale
 loadUserPacks(currentUserId);
