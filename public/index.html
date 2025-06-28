@@ -53,11 +53,6 @@
     <button onclick="showSection('admin')">Admin</button>
   </nav>
 
-<div class="tabs">
-  <button onclick="showTab('cards-tab')">Cards</button>
-  <button onclick="showTab('packs-tab')">Packs</button>
-  <button onclick="showTab('admin-tab')">Admin</button>
-</div>
 
   <section id="packs" class="active">
     <h2>Visualizza Pacchetti</h2>
@@ -333,24 +328,15 @@ document.getElementById('packImageUrl').addEventListener('input', e => {
 document.getElementById('imageUrl').addEventListener('input', e => {
 const url = e.target.value.trim();
 const preview = document.getElementById('imagePreview');
-preview.innerHTML = url ? <img src="${url}" alt="Anteprima immagine carta" style="max-width:200px; border-radius:8px;" /> : '';
+preview.innerHTML = url ? `<img src="${url}" alt="Anteprima immagine carta" style="max-width:200px; border-radius:8px;" />` : '';
+
 });
 
 // Caricamento iniziale
 loadPacksAndUI();
 
-function showTab(tabId) {
-  // Nasconde tutte le sezioni
-  document.querySelectorAll(".tab-content").forEach(section => {
-    section.style.display = "none";
-  });
 
-  // Mostra solo quella selezionata
-  document.getElementById(tabId).style.display = "block";
-}
-document.addEventListener("DOMContentLoaded", () => {
-  showTab('cards-tab'); // Mostra la sezione Cards all'inizio
-});
+
 
 </script>
 </body>
