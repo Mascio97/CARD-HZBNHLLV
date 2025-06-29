@@ -246,6 +246,10 @@ document.getElementById('create-pack-form').addEventListener('submit', async e =
   }
 });
 
+console.log('Packs ricevuti:', packs);
+console.log('Tipo:', typeof packs);
+console.log('È array?', Array.isArray(packs));
+
 // FORM CREAZIONE CARTA
 document.getElementById('create-card-form').addEventListener('submit', async e => {
   e.preventDefault();
