@@ -2,47 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Card Collector Activity</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #111;
-      color: #eee;
-    }
-    header {
-      background-color: #222;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-      border-bottom: 2px solid #333;
-    }
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      background-color: #1b1b1b;
-      padding: 0.5rem;
-    }
-    nav button {
-      background-color: #333;
-      color: #eee;
-      border: none;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    nav button:hover {
-      background-color: #555;
-    }
-    section {
-      padding: 1rem;
-      display: none;
-    }
-    section.active {
-      display: block;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; background: #111; color: #eee; }
+    header { background: #222; padding: 1rem; text-align: center; font-size: 1.5rem; border-bottom: 2px solid #333; }
+    nav { display: flex; justify-content: center; gap: 1rem; background: #1b1b1b; padding: .5rem; }
+    nav button { background: #333; color: #eee; border: none; padding: .5rem 1rem; cursor: pointer; border-radius: 5px; }
+    nav button:hover { background: #555; }
+    section { display: none; padding: 1rem; }
+    section.active { display: block; }
+    .pack, .user-pack { border: 1px solid #444; border-radius: 6px; padding: 10px; margin: 10px 0; max-width: 300px; }
+    .pack img, .user-pack img { max-width: 100%; border-radius: 5px; margin-bottom: 5px; }
   </style>
 </head>
 <body>
@@ -53,608 +24,252 @@
     <button onclick="showSection('admin')">Admin</button>
   </nav>
 
-
   <section id="packs" class="active">
-    <h2>Visualizza Pacchetti</h2>
-    <p>Qui puoi vedere e aprire i pacchetti di carte.</p>
-<div id="user-packs" style="margin-top: 20px;"></div>
-
-    <!-- TODO: inserire logica per mostrare/aprire pacchetti -->
+    <h2>I tuoi pacchetti</h2>
+    <div id="user-packs">Caricamento…</div>
   </section>
 
   <section id="collection">
-    <h2>La tua Collezione</h2>
-    <p>Qui puoi vedere tutte le carte che hai raccolto.</p>
-    <!-- TODO: inserire logica per mostrare la collezione -->
+    <h2>La tua collezione</h2>
+    <div id="user-collection">Caricamento…</div>
   </section>
 
-<section id="admin">
-  <h2>Area Admin</h2>
-  
-  <h3>Gestione Pacchetti</h3>
-  <form id="create-pack-form">
-    <input type="text" placeholder="Nome pacchetto" name="packName" required />
-    <input type="number" placeholder="Numero carte" name="cardCount" required />
-    <input type="url" placeholder="URL immagine pacchetto" name="packImageUrl" id="packImageUrl" />
-    <div id="packImagePreview" style="margin-top: 10px;">
-      <!-- Anteprima immagine pacchetto -->
-    </div>
-    <button type="submit">Crea Pacchetto</button>
-  </form>
-  <div id="pack-result" style="margin-top:10px;"></div>
-  <div id="pack-list" style="margin-top:20px;"></div>
-
-  <h3>Gestione Carte</h3>
-  <form id="create-card-form" style="margin-top:20px;">
-    <input type="text" placeholder="Nome carta" name="cardName" required />
-    <input type="text" placeholder="Tipo carta" name="cardType" />
-    <textarea name="description" placeholder="Descrizione"></textarea>
-    <input type="url" placeholder="URL immagine" name="imageUrl" id="imageUrl" />
-    <div id="imagePreview" style="margin-top: 10px;">
-      <!-- Anteprima immagine carta -->
-    </div>
-    <select name="packSelect" id="packSelect" required>
-      <option value="">Seleziona Pacchetto</option>
-      <!-- Opzioni caricate dinamicamente -->
-    </select>
-    <button type="submit">Aggiungi Carta</button>
-  </form>
-  <div id="card-list" style="margin-top:20px;"></div>
-</section>
-
-<div id="card-list"></div>
-
-</section>
-
- 
+  <section id="admin">
+    <h2>Area Admin</h2>
+    <h3>Gestione Pacchetti</h3>
+    <form id="create-pack-form">
+      <input type="text" name="packName" placeholder="Nome pacchetto" required/>
+      <input type="number" name="cardCount" placeholder="Numero carte" required/>
+      <input type="url" name="packImageUrl" id="packImageUrl" placeholder="URL immagine pacchetto"/>
+      <div id="packImagePreview" style="margin-top:10px;"></div>
+      <button type="submit">Crea Pacchetto</button>
+    </form>
+    <div id="pack-list" style="margin-top:20px;"></div>
+    <h3>Gestione Carte</h3>
+    <form id="create-card-form" style="margin-top:20px;">
+      <input type="text" name="cardName" placeholder="Nome carta" required/>
+      <input type="text" name="cardType" placeholder="Tipo carta"/>
+      <textarea name="description" placeholder="Descrizione"></textarea>
+      <input type="url" name="imageUrl" id="imageUrl" placeholder="URL immagine carta"/>
+      <div id="imagePreview" style="margin-top:10px;"></div>
+      <select name="packSelect" id="packSelect" required>
+        <option value="">Seleziona Pacchetto</option>
+      </select>
+      <button type="submit">Aggiungi Carta</button>
+    </form>
+    <div id="card-list" style="margin-top:20px;"></div>
+  </section>
 
 <script>
-  // Inserisci qui gli ID Discord autorizzati (admin)
-  const adminIDs = [
-    "353012142066237442",  // <-- sostituisci con i tuoi ID Discord
-    "987654321098765432"
-  ];
-
-  // Simulazione dell'utente attuale (in produzione lo prenderai con l'SDK)
-  const currentUserId = "353012142066237442"; // ← da aggiornare dinamicamente
-
-  // Se non è admin, nascondi il bottone e la sezione
-  if (!adminIDs.includes(currentUserId)) {
-    document.querySelector("button[onclick=\"showSection('admin')\"]").style.display = "none";
-    document.getElementById("admin").remove();
-  }
+  // Utility
+  const SUPABASE_URL = 'https://lwlsnrbrkpzzfxixcoqj.supabase.co';
+  const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const currentUserId = '353012142066237442';
 
   function showSection(id) {
-    document.querySelectorAll('section').forEach(sec => {
-      sec.classList.remove('active');
-    });
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
 
-
-
-const SUPABASE_URL = 'https://lwlsnrbrkpzzfxixcoqj.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bHNucmJya3B6emZ4aXhjb3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMTgxODIsImV4cCI6MjA2NjY5NDE4Mn0.nrtqIG59DUmy2lgn5C6Yg1e7t-12_ImoFrPy2pF4jE8';
-
-async function fetchPacks() {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/packs?select=*`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
-    }
-  });
-  if (!res.ok) throw new Error('Errore fetch pacchetti');
-  return await res.json();
-}
-
-async function fetchCards(packId) {
-  if (!packId) {
-    document.getElementById('card-list').innerHTML = '';
-    return;
-  }
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/cards?pack_id=eq.${packId}`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
-    }
-  });
-  if (!res.ok) throw new Error('Errore fetch carte');
-  return await res.json();
-}
-
-async function loadPacksAndUI() {
-  try {
-    const packs = await fetchPacks();
-
-    // Sezione admin - lista pacchetti e select
-    const packList = document.getElementById('pack-list');
-    const packSelect = document.getElementById('packSelect');
-    packList.innerHTML = '<h4>Pacchetti esistenti:</h4>';
-    packSelect.innerHTML = '<option value="">Seleziona Pacchetto</option>';
-
-    packs.forEach(pack => {
-      const div = document.createElement('div');
-      div.style.marginBottom = '10px';
-      div.innerHTML = `
-        ${pack.image_url ? `<img src="${pack.image_url}" alt="Immagine pacchetto" style="max-width:100px; max-height:100px; display:block; margin-bottom:5px; border-radius:5px;">` : ''}
-        <strong>${pack.name}</strong> - Carte: ${pack.card_count}
-      `;
-      packList.appendChild(div);
-
-      const option = document.createElement('option');
-      option.value = pack.id;
-      option.textContent = pack.name;
-      packSelect.appendChild(option);
-    });
-
-    // Sezione "packs" - mostra pacchetti per apertura
-    const packsSection = document.getElementById('packs');
-    packsSection.innerHTML = '<h2>Visualizza Pacchetti</h2><p>Qui puoi vedere e aprire i pacchetti di carte.</p>';
-    packs.forEach(pack => {
-      const packDiv = document.createElement('div');
-      packDiv.style.marginBottom = '15px';
-      packDiv.style.border = '1px solid #444';
-      packDiv.style.padding = '10px';
-      packDiv.style.borderRadius = '8px';
-      packDiv.style.maxWidth = '300px';
-
-      packDiv.innerHTML = `
-        ${pack.image_url ? `<img src="${pack.image_url}" alt="Immagine pacchetto" style="max-width:100%; max-height:150px; border-radius:5px; margin-bottom:10px;">` : ''}
-        <strong>${pack.name}</strong><br>
-        Carte: ${pack.card_count}<br>
-        <button onclick="alert('Qui apriresti il pacchetto: ${pack.name}')">Apri pacchetto</button>
-      `;
-
-      packsSection.appendChild(packDiv);
-    });
-
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-// FORM CREAZIONE PACCHETTO
-document.getElementById('create-pack-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const name = e.target.packName.value.trim();
-  const cardCount = parseInt(e.target.cardCount.value);
-  const imageUrl = e.target.packImageUrl.value.trim() || null;
-
-  try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/packs`, {
-      method: 'POST',
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=representation'
-      },
-      body: JSON.stringify({ name, card_count: cardCount, image_url: imageUrl })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(errText);
-    }
-
-    e.target.reset();
-    document.getElementById('packImagePreview').innerHTML = '';
-    await loadPacksAndUI();
-    alert('Pacchetto creato con successo!');
-  } catch (error) {
-    alert('Errore creazione pacchetto: ' + error.message);
-  }
-});
-
-console.log('Packs ricevuti:', packs);
-console.log('Tipo:', typeof packs);
-console.log('È array?', Array.isArray(packs));
-
-// FORM CREAZIONE CARTA
-document.getElementById('create-card-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const name = e.target.cardName.value.trim();
-  const type = e.target.cardType.value.trim();
-  const description = e.target.description.value.trim();
-  const packId = e.target.packSelect.value;
-  const imageUrl = e.target.imageUrl.value.trim() || null;
-
-  if (!packId) {
-    alert('Seleziona un pacchetto per la carta');
-    return;
+  // Fetch Helpers
+  async function fetchUserPacks() {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${currentUserId}&select=quantity,pack:pack_id(id,name,image_url,card_count)`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) throw new Error(await res.text());
+    const json = await res.json();
+    return Array.isArray(json) ? json : [];
   }
 
-  try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/cards`, {
-      method: 'POST',
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=representation'
-      },
-      body: JSON.stringify({
-        name, type, description, pack_id: packId, image_url: imageUrl
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(errText);
-    }
-
-    e.target.reset();
-    document.getElementById('imagePreview').innerHTML = '';
-    // Carica carte del pacchetto selezionato
-    loadCards(packId);
-    alert('Carta creata con successo!');
-  } catch (error) {
-    alert('Errore creazione carta: ' + error.message);
+  async function fetchUserCollection() {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${currentUserId}&select=quantity,card:card_id(name,type,description,image_url)`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) throw new Error(await res.text());
+    const json = await res.json();
+    return Array.isArray(json) ? json : [];
   }
-});
 
-async function loadCards(packId) {
-  try {
-    const cards = await fetchCards(packId);
-    const cardList = document.getElementById('card-list');
-    cardList.innerHTML = '<h4>Carte nel pacchetto selezionato:</h4>';
-
-    cards.forEach(card => {
-      const div = document.createElement('div');
-      div.style.marginBottom = '10px';
-      div.style.borderBottom = '1px solid #444';
-      div.style.paddingBottom = '5px';
-
-      div.innerHTML = `
-        <strong>${card.name}</strong> (${card.type || 'N/A'})<br>
-        ${card.description || ''}<br>
-        ${card.image_url ? `<img src="${card.image_url}" alt="${card.name}" style="max-width:150px; border-radius:5px; margin-top:5px;">` : ''}
-      `;
-
-      cardList.appendChild(div);
-    });
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-// Cambia pacchetto selezionato per caricare le carte
-document.getElementById('packSelect').addEventListener('change', e => {
-  loadCards(e.target.value);
-});
-
-// Preview immagine pacchetto
-document.getElementById('packImageUrl').addEventListener('input', e => {
-  const url = e.target.value.trim();
-  const preview = document.getElementById('packImagePreview');
-  preview.innerHTML = url ? `<img src="${url}" alt="Anteprima immagine pacchetto" style="max-width:200px; border-radius:8px;" />` : '';
-});
-
-// Preview immagine carta
-document.getElementById('imageUrl').addEventListener('input', e => {
-const url = e.target.value.trim();
-const preview = document.getElementById('imagePreview');
-preview.innerHTML = url ? `<img src="${url}" alt="Anteprima immagine carta" style="max-width:200px; border-radius:8px;" />` : '';
-
-});
-
-// Caricamento iniziale
-loadPacksAndUI();
-
-const packs = await fetchUserPacks(userId);
-
-if (!packs || !Array.isArray(packs) || packs.length === 0) {
-  document.getElementById('user-packs').innerHTML = '<p>Non hai pacchetti disponibili.</p>';
-  return;
-}
-
-packs.forEach(pack => {
-  const div = document.createElement('div');
-  // ... il resto del codice
-
-
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&select=*,pack:pack_id(name,image_url,card_count)`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
-    }
-  });
-  if (!res.ok) throw new Error('Errore nel recupero pacchetti utente');
-return (await res.json()) || [];
-
-}
-
-async function openPack(packId, userId) {
-  try {
-    // Prendi le carte del pacchetto
-    const cards = await fetchCards(packId);
-    if (!cards.length) {
-      alert("Il pacchetto è vuoto!");
-      return;
-    }
-
-    // Pesca una carta casuale
-    const card = cards[Math.floor(Math.random() * cards.length)];
-
-    // Aggiungi o aggiorna la carta nell'user_cards
-    // Prima controllo se l'utente ha già la carta
-    let res = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&card_id=eq.${card.id}`, {
+  async function fetchAllPacks() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/packs?select=*`, {
       headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
     });
-    if (!res.ok) throw new Error('Errore fetch user_cards');
-    const existing = await res.json();
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
+  }
 
-    if (existing.length > 0) {
-      // Aggiorna quantità +1
-      const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&card_id=eq.${card.id}`, {
-        method: 'PATCH',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ quantity: existing[0].quantity + 1 })
-      });
-      if (!updateRes.ok) throw new Error('Errore aggiornamento carta');
-    } else {
-      // Inserisci nuova carta
-      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards`, {
-        method: 'POST',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          card_id: card.id,
-          quantity: 1
-        })
-      });
-      if (!insertRes.ok) throw new Error('Errore inserimento carta');
-    }
-
-    // Decrementa quantità pacchetto (leggi prima la quantità attuale)
-    res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
+  async function fetchCards(packId) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/cards?pack_id=eq.${packId}`, {
       headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
     });
-    if (!res.ok) throw new Error('Errore fetch user_packs');
-    const userPack = await res.json();
-    if (userPack.length === 0) throw new Error('Pacchetto utente non trovato');
-    const currentQty = userPack[0].quantity;
-    if (currentQty <= 0) {
-      alert("Non hai più pacchetti di questo tipo!");
-      return;
-    }
-    const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
-      method: 'PATCH',
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ quantity: currentQty - 1 })
-    });
-    if (!patchRes.ok) throw new Error('Errore aggiornamento quantità pacchetto');
-
-    alert(`Hai ottenuto: ${card.name}`);
-    loadUserPacks(userId);
-  } catch (err) {
-    console.error(err);
-    alert('Errore apertura pacchetto: ' + err.message);
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
   }
-}
 
-async function loadUserPacks(userId) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&select=quantity,pack:pack_id(id,name,image_url,card_count)`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
-      }
-    });
-    if (!res.ok) throw new Error('Errore fetch user packs');
-    const packs = await res.json();
+  // Renderers
+  async function loadUserPacks() {
     const container = document.getElementById('user-packs');
-    container.innerHTML = "<h3>I tuoi pacchetti:</h3>";
-    if (packs.length === 0) {
-      container.innerHTML += "<p>Non hai pacchetti da aprire.</p>";
-      return;
-    }
-    packs.forEach(pack => {
-      container.innerHTML += `
-        <div style="border:1px solid #444; margin-bottom:10px; padding:10px; border-radius:6px; max-width:300px;">
-          ${pack.pack.image_url ? `<img src="${pack.pack.image_url}" alt="Immagine pacchetto" style="max-width:100%; max-height:150px; border-radius:5px; margin-bottom:10px;">` : ''}
-          <strong>${pack.pack.name}</strong><br>
-          Carte: ${pack.pack.card_count}<br>
-          Quantità: ${pack.quantity}<br>
-          <button onclick="openPack(${pack.pack.id}, '${userId}')">Apri Pacchetto</button>
-        </div>
-      `;
-    });
-  } catch (err) {
-    console.error(err);
-    alert('Errore caricamento pacchetti utente: ' + err.message);
-  }
-}
-
-
-// Caricamento iniziale
-loadUserPacks(currentUserId);
-
-
-// helpers.js
-
-export async function addOrUpdateUserCard(userId, cardId) {
-  const { data, error } = await supabase
-    .from('user_cards')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('card_id', cardId)
-    .maybeSingle();
-
-  if (data) {
-    await supabase
-      .from('user_cards')
-      .update({ quantity: data.quantity + 1 })
-      .eq('user_id', userId)
-      .eq('card_id', cardId);
-  } else {
-    await supabase
-      .from('user_cards')
-      .insert({ user_id: userId, card_id: cardId, quantity: 1 });
-  }
-}
-
-export async function loadUserCollection(userId) {
-  const { data: entries } = await supabase
-    .from('user_cards')
-    .select('quantity, card:card_id(name, type, description, image_url)')
-    .eq('user_id', userId);
-
-  const container = document.getElementById('collection');
-  container.innerHTML = '<h2>La tua collezione</h2>';
-
-  entries.forEach(e => {
-    container.innerHTML += `
-      <div style="margin-bottom:10px;">
-        <img src="${e.card.image_url}" alt="${e.card.name}" style="max-width:100px; border-radius:5px;"/>
-        <strong>${e.card.name}</strong> (x${e.quantity})<br>
-        ${e.card.type || ''} - ${e.card.description || ''}
-      </div>`;
-  });
-}
-
-async function openPack(packId, userId) {
-  try {
-    // Ottieni le carte del pacchetto
-    const cards = await fetchCards(packId);
-    if (!cards.length) {
-      alert("Il pacchetto non contiene carte!");
-      return;
-    }
-
-    // Pesca casuale una carta
-    const card = cards[Math.floor(Math.random() * cards.length)];
-
-    // Aggiungi o aggiorna la carta nella collezione utente
-    const userCardRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&card_id=eq.${card.id}`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
-      }
-    });
-    if (!userCardRes.ok) throw new Error("Errore nel controllo carta utente");
-    const existingUserCards = await userCardRes.json();
-
-    if (existingUserCards.length > 0) {
-      // aggiorna quantità
-      const newQuantity = existingUserCards[0].quantity + 1;
-      const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&card_id=eq.${card.id}`, {
-        method: 'PATCH',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ quantity: newQuantity })
+    try {
+      const packs = await fetchUserPacks();
+      container.innerHTML = packs.length ? '' : '<p>Nessun pacchetto.</p>';
+      packs.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'user-pack';
+        div.innerHTML = `
+          ${p.pack.image_url ? `<img src="${p.pack.image_url}">` : ''}
+          <strong>${p.pack.name}</strong><br>
+          ${p.pack.card_count} carte • ${p.quantity} pezzi<br>
+          <button onclick="openPack(${p.pack.id})">Apri</button>
+        `;
+        container.appendChild(div);
       });
-      if (!updateRes.ok) throw new Error("Errore aggiornamento quantità carta");
-    } else {
-      // inserisci nuova carta
-      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/user_cards`, {
+    } catch(e) {
+      container.innerHTML = '<p>Errore caricamento pacchetti.</p>';
+      console.error(e);
+    }
+  }
+
+  async function loadUserCollection() {
+    const container = document.getElementById('user-collection');
+    try {
+      const cards = await fetchUserCollection();
+      container.innerHTML = cards.length ? '' : '<p>Nessuna carta.</p>';
+      cards.forEach(e => {
+        const div = document.createElement('div');
+        div.className = 'user-pack';
+        div.innerHTML = `
+          ${e.card.image_url ? `<img src="${e.card.image_url}">` : ''}
+          <strong>${e.card.name}</strong> (x${e.quantity})<br>
+          ${e.card.type || ''} - ${e.card.description || ''}
+        `;
+        container.appendChild(div);
+      });
+    } catch(e) {
+      container.innerHTML = '<p>Errore caricamento collezione.</p>';
+      console.error(e);
+    }
+  }
+
+  // Open a pack
+  async function openPack(packId) {
+    try {
+      const cards = await fetchCards(packId);
+      if (!cards.length) return alert('Pacchetto vuoto!');
+      const card = cards[Math.floor(Math.random()*cards.length)];
+
+      // Add to user_cards
+      await fetch(`${SUPABASE_URL}/rest/v1/user_cards`, {
         method: 'POST',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ user_id: userId, card_id: card.id, quantity: 1 })
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json' },
+        body: JSON.stringify({ user_id: currentUserId, card_id: card.id, quantity:1 })
       });
-      if (!insertRes.ok) throw new Error("Errore inserimento carta utente");
-    }
 
-    // Decrementa quantità del pacchetto
-    const userPackRes = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
-      }
-    });
-    if (!userPackRes.ok) throw new Error("Errore recupero pacchetto utente");
-    const userPacks = await userPackRes.json();
-    if (userPacks.length === 0) throw new Error("Pacchetto utente non trovato");
-
-    const currentQuantity = userPacks[0].quantity;
-    if (currentQuantity <= 1) {
-      // elimina il record
-      const deleteRes = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
-        method: 'DELETE',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`
+      // Decrement user_packs
+      const upRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${currentUserId}&pack_id=eq.${packId}`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      );
+      const [up] = await upRes.json();
+      if (!up) throw 'Pacchetto utente non trovato';
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${currentUserId}&pack_id=eq.${packId}`,
+        {
+          method: up.quantity>1?'PATCH':'DELETE',
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json' },
+          body: up.quantity>1?JSON.stringify({ quantity: up.quantity-1 }):null
         }
-      });
-      if (!deleteRes.ok) throw new Error("Errore eliminazione pacchetto utente");
-    } else {
-      // aggiorna quantità decrementandola di 1
-      const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&pack_id=eq.${packId}`, {
-        method: 'PATCH',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ quantity: currentQuantity - 1 })
-      });
-      if (!patchRes.ok) throw new Error("Errore aggiornamento quantità pacchetto");
+      );
+
+      alert(`Hai ottenuto: ${card.name}`);
+      loadUserPacks();
+      loadUserCollection();
+    } catch(e) {
+      console.error(e);
+      alert('Errore apertura pacchetto: ' + e);
     }
-
-    alert(`Hai ottenuto: ${card.name}`);
-    await loadUserPacks(userId); // Ricarica lista pacchetti
-  } catch (error) {
-    console.error(error);
-    alert("Errore apertura pacchetto: " + error.message);
   }
-}
 
-
-async function loadUserCollection(userId) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/user_cards?user_id=eq.${userId}&select=card:card_id(name,description,image_url,type)`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
+  // Admin: Create pack
+  document.getElementById('create-pack-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target;
+    const name = f.packName.value.trim();
+    const cardCount = parseInt(f.cardCount.value);
+    const imageUrl = f.packImageUrl.value.trim()||null;
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/packs`, {
+        method: 'POST',
+        headers:{ apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json', Prefer:'return=representation' },
+        body: JSON.stringify({ name, card_count: cardCount, image_url:imageUrl })
+      });
+      f.reset();
+      loadAllPacks();
+      alert('Pacchetto creato');
+    } catch(err) {
+      console.error(err);
+      alert('Errore creazione pacchetto');
     }
   });
-  const cards = await res.json();
 
-  const container = document.getElementById('collection');
-  const display = document.createElement('div');
-  display.innerHTML = '<h3>Le tue carte:</h3>';
+  // Admin: Create card
+  document.getElementById('create-card-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target;
+    const payload = {
+      name: f.cardName.value.trim(),
+      type: f.cardType.value.trim()||null,
+      description: f.description.value.trim()||null,
+      image_url: f.imageUrl.value.trim()||null,
+      pack_id: parseInt(f.packSelect.value)
+    };
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/cards`, {
+        method:'POST',
+        headers:{ apikey: SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json', Prefer:'return=representation' },
+        body: JSON.stringify(payload)
+      });
+      f.reset();
+      alert('Carta aggiunta');
+    } catch(err) {
+      console.error(err);
+      alert('Errore aggiunta carta');
+    }
+  });
 
-  if (cards.length === 0) {
-    display.innerHTML += "<p>Non hai ancora carte nella tua collezione.</p>";
-  } else {
-    cards.forEach(entry => {
-      const div = document.createElement('div');
-      div.style.borderBottom = '1px solid #444';
-      div.style.marginBottom = '10px';
-      div.style.paddingBottom = '5px';
-      div.innerHTML = `
-        <strong>${entry.card.name}</strong> (${entry.card.type || 'N/A'})<br>
-        ${entry.card.description || ''}<br>
-        ${entry.card.image_url ? `<img src="${entry.card.image_url}" style="max-width:150px; border-radius:5px; margin-top:5px;">` : ''}
-      `;
-      display.appendChild(div);
-    });
+  // Load all packs into admin dropdown & list
+  async function loadAllPacks() {
+    const list = document.getElementById('pack-list');
+    const sel = document.getElementById('packSelect');
+    try {
+      const packs = await fetchAllPacks();
+      list.innerHTML = '<h4>Pacchetti esistenti</h4>';
+      sel.innerHTML = '<option value="">Seleziona Pacchetto</option>';
+      packs.forEach(p => {
+        const div = document.createElement('div');
+        div.className='pack';
+        div.innerHTML = `
+          ${p.image_url?`<img src="${p.image_url}">`:''}
+          <strong>${p.name}</strong> - ${p.card_count} carte
+        `;
+        list.appendChild(div);
+        const opt = document.createElement('option');
+        opt.value = p.id; opt.textContent = p.name;
+        sel.appendChild(opt);
+      });
+    } catch(e) {
+      console.error(e);
+      list.textContent = 'Errore caricamento pacchetti.';
+    }
   }
 
-  // Pulisce e aggiorna la sezione
-  container.innerHTML = '<h2>La tua Collezione</h2>';
-  container.appendChild(display);
-}
-
-
+  // Init
+  (async function(){
+    await loadUserPacks();
+    await loadUserCollection();
+    await loadAllPacks();
+  })();
 </script>
 </body>
 </html>
