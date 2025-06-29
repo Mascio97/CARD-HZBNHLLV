@@ -337,7 +337,18 @@ preview.innerHTML = url ? `<img src="${url}" alt="Anteprima immagine carta" styl
 // Caricamento iniziale
 loadPacksAndUI();
 
-async function fetchUserPacks(userId) {
+const packs = await fetchUserPacks(userId);
+
+if (!packs || !Array.isArray(packs) || packs.length === 0) {
+  document.getElementById('user-packs').innerHTML = '<p>Non hai pacchetti disponibili.</p>';
+  return;
+}
+
+packs.forEach(pack => {
+  const div = document.createElement('div');
+  // ... il resto del codice
+
+
   const res = await fetch(`${SUPABASE_URL}/rest/v1/user_packs?user_id=eq.${userId}&select=*,pack:pack_id(name,image_url,card_count)`, {
     headers: {
       apikey: SUPABASE_KEY,
@@ -345,7 +356,8 @@ async function fetchUserPacks(userId) {
     }
   });
   if (!res.ok) throw new Error('Errore nel recupero pacchetti utente');
-  return await res.json();
+return (await res.json()) || [];
+
 }
 
 async function openPack(packId, userId) {
